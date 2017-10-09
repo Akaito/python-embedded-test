@@ -7,5 +7,5 @@ CXX := clang++
 CC += $(PYTHON3_LDFLAGS) $(PYTHON3_CFLAGS)
 CXX += $(PYTHON3_LDFLAGS) $(PYTHON3_CFLAGS)
 
-a.out:
+a.out: main.cpp
 	$(CXX) main.cpp
