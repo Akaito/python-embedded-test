@@ -19,7 +19,9 @@ void runfile(const char * filename) {
 int main (int argc, const char ** argv) {
 	Py_Initialize();
 
-	wchar_t * programName = Py_DecodeLocale(argv[0], nullptr);
+	// Py_DecodeLocale doesn't exist until 3.5
+	//wchar_t * programName = Py_DecodeLocale(argv[0], nullptr);
+	wchar_t * programName = const_cast<wchar_t*>(L"a.out");
 	Py_SetProgramName(programName); // "optional but recommended"
 
 	// test executing Python passed from program
@@ -28,7 +30,7 @@ int main (int argc, const char ** argv) {
 	runfile("test.py");
 
 	Py_Finalize();
-	PyMem_RawFree(programName);
+	//PyMem_RawFree(programName);
 	return 0;
 }
 
