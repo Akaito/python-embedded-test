@@ -1,3 +1,6 @@
+// References:
+// - https://docs.python.org/3/extending/embedding.html
+
 #include <cstdio>
 
 #include <Python.h>
@@ -16,11 +19,16 @@ void runfile(const char * filename) {
 int main (int argc, const char ** argv) {
 	Py_Initialize();
 
+	wchar_t * programName = Py_DecodeLocale(argv[0], nullptr);
+	Py_SetProgramName(programName); // "optional but recommended"
+
 	// test executing Python passed from program
 	PyRun_SimpleString("print('test {}'.format(2 + 8))");
 
 	runfile("test.py");
 
+	Py_Finalize();
+	PyMem_RawFree(programName);
 	return 0;
 }
 
