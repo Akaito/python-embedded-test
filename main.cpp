@@ -6,7 +6,8 @@
 #include <Python.h>
 
 
-void runfile(const char * filename) {
+//====================================================
+void runFile (const char * filename) {
 	FILE * pyfile = std::fopen(filename, "rt");
 	PyRun_SimpleFileEx(
 		pyfile,
@@ -16,9 +17,38 @@ void runfile(const char * filename) {
 }
 
 
-int main (int argc, const char ** argv) {
-	Py_Initialize();
+//====================================================
+bool callFunction (const char * moduleName, const char * funcName) {
+	PyObject * module_name = PyString_FromString(moduleName);
+	PyObject * module = PyImport_Import(module_name);
+	Py_DECREF(module_name);
+	module_name = nullptr;
 
+	if (!module) {
+		PyErr_Print();
+		std::fprintf(stderr, "Failed to load Python module {%s}.\n", moduleName);
+		return false;
+	}
+
+	PyObject * func = PyObject_GetAttrString(module, funcName);
+	if (func && PyCallable_Check(func)) {
+		//PyObject * args = 
+		PyObject_CallObject(func, nullptr);
+	}
+	else { // function not found or not callable
+		if (PyErr_Occurred())
+			PyErr_Print();
+		std::fprintf(stderr, "Failed to find callable named {%s}.\n", funcName);
+	}
+	Py_XDECREF(func);
+	Py_DECREF(module);
+
+	return true;
+}
+
+
+//====================================================
+int main (int argc, const char ** argv) {
 #ifdef PYTHON3
 	// Py_DecodeLocale doesn't exist until 3.5
 	//wchar_t * programName = Py_DecodeLocale(argv[0], nullptr);
@@ -27,11 +57,14 @@ int main (int argc, const char ** argv) {
 #else
 	Py_SetProgramName(const_cast<char*>(argv[0]));
 #endif
+	Py_Initialize();
 
 	// test executing Python passed from program
 	PyRun_SimpleString("print('test {}'.format(2 + 8))");
 
-	runfile("test.py");
+	runFile("test.py");
+
+	callFunction("test", "test_func");
 
 	Py_Finalize();
 #ifdef PYTHON3
